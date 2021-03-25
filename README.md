@@ -1,1 +1,1 @@
-# CG-2021 template
+# Lab1
