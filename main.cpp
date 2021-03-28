@@ -3,6 +3,7 @@
 #include "filter_logic.h"
 #include "dot_filters.h"
 #include "kernel_filters.h"
+#include "morpho_filters.h"
 #include <ctime>
 
 int main(int argc, char* argv[])
@@ -103,8 +104,16 @@ int main(int argc, char* argv[])
     erode.process(img).save("erose2.png");
     printf_s("Erosing filter with a diff kernel done\n");
 
-    MedianFilter median(5);
+    MedianFilter median(2);
     median.process(img).save("median.png");
     printf_s("Median filter done\n");
+
+    TopHatFilter top;
+    top.process(img).save("tophat.png");
+    printf_s("TopHat filter done\n");
+
+    BlackHatFilter black;
+    black.process(img).save("blackhat.png");
+    printf_s("BlackHat filter done\n");
 
 }

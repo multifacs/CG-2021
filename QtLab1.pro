@@ -11,7 +11,8 @@ SOURCES += \
         dot_filters.cpp \
         filter_logic.cpp \
         kernel_filters.cpp \
-        main.cpp
+        main.cpp \
+        morpho_filters.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -21,4 +22,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     dot_filters.h \
     filter_logic.h \
-    kernel_filters.h
+    kernel_filters.h \
+    morpho_filters.h
