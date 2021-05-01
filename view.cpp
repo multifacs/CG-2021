@@ -12,6 +12,9 @@ void View::initializeGL() {
     glShadeModel(GL_SMOOTH);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+
+    glGenTextures(1, &VBOtexture);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 }
 
 void View::resizeGL(int n_width, int n_height) {
@@ -33,7 +36,7 @@ void View::paintGL() {
             //VisualisationQuadStrip();
             break;
         case kVisualisationTexture:
-            //VisualisationTexture();
+            VisualisationTexture();
             break;
     }
 }
@@ -68,6 +71,25 @@ void View::VisualisationQuads() {
     }
 }
 
+void View::VisualisationTexture()
+{
+    genTextureImage();
+    Load2dTexture();
+
+    glEnable(GL_TEXTURE_2D);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0);
+    glVertex2i(0, 0);
+    glTexCoord2f(0, 1);
+    glVertex2i(0, data_.GetHeight());
+    glTexCoord2f(1, 1);
+    glVertex2i(data_.GetWidth(), data_.GetHeight());
+    glTexCoord2f(1, 0);
+    glVertex2i(data_.GetWidth(), 0);
+    glEnd();
+    glDisable(GL_TEXTURE_2D);
+}
+
 float View::TransferFunction(short value) {
     return float(value - data_.GetMin()) / float(data_.GetMax() - data_.GetMin());
 }
@@ -92,4 +114,30 @@ void View::keyPressEvent(QKeyEvent *event) {
     }
 
     update();
+}
+
+
+void View::Load2dTexture()
+{
+    qDebug() << "LOAD_TEXTURE";
+    glBindTexture(GL_TEXTURE_2D, VBOtexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureImage.width(), textureImage.height(),
+    0, GL_BGRA, GL_UNSIGNED_BYTE, textureImage.bits());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
+
+void View::genTextureImage()
+{
+    int w = data_.GetWidth();
+    int h = data_.GetHeight();
+    textureImage = QImage(w, h, QImage::Format_RGB32);
+    qDebug() << "GEN_TEXTURE";
+    for (int y = 0; y < h; y++)
+    for (int x = 0; x < w; x++)
+    {
+        float c = TransferFunction(data_[layer_ * w * h + w * y + x]) * 255;
+        //QColor c(255,0,0);
+        textureImage.setPixelColor(x, y, QColor(c,c,c));
+    }
 }

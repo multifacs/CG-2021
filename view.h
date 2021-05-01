@@ -24,6 +24,11 @@ protected:
     void VisualisationTexture();
 
     float TransferFunction(short value);
+
+    GLuint VBOtexture;
+    void Load2dTexture();
+    QImage textureImage;
+    void genTextureImage();
 public:
     View(QWidget *parent = nullptr);
     void LoadData(std::string filename);

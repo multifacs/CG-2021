@@ -40,12 +40,6 @@ void Data::ReadFile(std::string filename) {
         if (data_[i] < min_) min_ = data_[i];
         if (data_[i] > max_) max_ = data_[i];
     }
-    printf("Data: %d\n", data_[50]);
-    printf("Data: %d\n", data_[259]);
-    printf("Data: %d\n", data_[1000]);
-    printf("Data: %d\n", data_[2]);
-    printf("Min: %d\n", min_);
-    printf("Max: %d\n", max_);
 }
 
 short Data::operator[](int i) {
