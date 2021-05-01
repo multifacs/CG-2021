@@ -1,15 +1,23 @@
-#include <QCoreApplication>
-#include <string>
+#include "view.h"
+
+#include <QApplication>
+
+#pragma comment (lib, "opengl32.lib")
 
 int main(int argc, char *argv[])
 {
-    std::string s;
+    QApplication a(argc, argv);
+    View w;
+    QSurfaceFormat format;
 
-    for (int i = 0; i < argc; i++)
-    {
-        if (!strcmp(argv[i], "-p") && (i + 1 < argc))
-        {
-            s = argv[i + 1];
-        }
-    }
+    //format.setDepthBufferSize(24);
+    //format.setVersion(3, 5);
+    //format.setProfile(QSurfaceFormat::CoreProfile);
+
+    QSurfaceFormat::setDefaultFormat(format);
+
+    w.setFormat(format);
+    w.LoadData("FOURDIX-1.bin");
+    w.show();
+    return a.exec();
 }
