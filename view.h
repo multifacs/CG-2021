@@ -6,7 +6,6 @@
 #include <QtWidgets/QOpenGLWidget>
 #include <QtOpenGL/QGLFunctions>
 #include <QtOpenGL/qtopenglglobal.h>
-//#include <QtOpenGL/qopenglfunctions_2_0.h>
 
 class View : public QOpenGLWidget, protected QOpenGLFunctions {
     Q_OBJECT

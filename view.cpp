@@ -33,7 +33,7 @@ void View::paintGL() {
             VisualisationQuads();
             break;
         case kVisualisationQuadStrip:
-            //VisualisationQuadStrip();
+            VisualisationQuadStrip();
             break;
         case kVisualisationTexture:
             VisualisationTexture();
@@ -47,9 +47,11 @@ void View::VisualisationQuads() {
     int h = data_.GetHeight();
 
     for (int y = 0; y < h - 1; y++) {
-        for (int x = 0; x < w - 1; x++) {
-            glBegin(GL_QUADS);
 
+
+        for (int x = 0; x < w - 1; x++)
+        {
+            glBegin(GL_QUADS);
             c = TransferFunction(data_[layer_ * w * h + y * w + x]);
             glColor3f(c, c, c);
             glVertex2i(x, y);
@@ -65,10 +67,32 @@ void View::VisualisationQuads() {
             c = TransferFunction(data_[layer_ * w * h + y * w + x + 1]);
             glColor3f(c, c, c);
             glVertex2i(x + 1, y);
-
             glEnd();
         }
-    }
+
+
+}
+}
+
+void View::VisualisationQuadStrip() {
+    float c;
+    int w = data_.GetWidth();
+    int h = data_.GetHeight();
+
+    for (int y = 0; y < h - 1; y++) {
+            glBegin(GL_QUAD_STRIP);
+            for (int x = 0; x < w; x++)
+            {
+                c = TransferFunction(data_[layer_ * w * h + y * w + x]);
+                glColor3f(c, c, c);
+                glVertex2i(x, y);
+
+                c = TransferFunction(data_[layer_ * w * h + (y + 1) * w + x]);
+                glColor3f(c, c, c);
+                glVertex2i(x, y + 1);
+            }
+            glEnd();
+        }
 }
 
 void View::VisualisationTexture()
@@ -96,10 +120,10 @@ float View::TransferFunction(short value) {
 
 void View::keyPressEvent(QKeyEvent *event) {
     quint32 key_pressed = event->nativeVirtualKey();
-    if (key_pressed == Qt::Key_U || key_pressed == Qt::Key_Up) {
+    if (key_pressed == Qt::Key_W) {
         layer_ = std::min(layer_ + 1, data_.GetDepth() - 1);
         //layer_ = ((layer_ + 2) < data_.GetDepth()) * (layer_ + 1);
-    } else if (key_pressed == Qt::Key_D || key_pressed == Qt::Key_Down) {
+    } else if (key_pressed == Qt::Key_S) {
         layer_ = std::max(layer_ - 1, 0);
         //layer_ = (layer_ > 0) * (layer_ - 1);
     } else if (key_pressed == Qt::Key_N) {
