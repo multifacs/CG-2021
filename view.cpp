@@ -1,12 +1,14 @@
 #include "view.h"
 
-View::View(QWidget *parent) : QOpenGLWidget(parent), data_(), layer_(0), visualisation_state_(kVisualisationQuads) {}
+View::View(QWidget *parent) : QOpenGLWidget(parent), data_(), layer_(0), visualisation_state_(kVisualisationQuads), axis_cut_(x) {}
 
-void View::LoadData(std::string filename) {
+void View::LoadData(std::string filename)
+{
     data_.ReadFile(filename);
 }
 
-void View::initializeGL() {
+void View::initializeGL()
+{
     initializeOpenGLFunctions();
     glClearColor(0, 0, 0, 0);
     glShadeModel(GL_SMOOTH);
@@ -17,7 +19,8 @@ void View::initializeGL() {
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 }
 
-void View::resizeGL(int n_width, int n_height) {
+void View::resizeGL(int n_width, int n_height)
+{
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0.f, data_.GetWidth() - 1, 0.f, data_.GetHeight() - 1, -1.f, 1.f);
@@ -25,10 +28,12 @@ void View::resizeGL(int n_width, int n_height) {
     update();
 }
 
-void View::paintGL() {
+void View::paintGL()
+{
     qDebug() << "repaint" << visualisation_state_;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    switch (visualisation_state_) {
+    switch (visualisation_state_)
+    {
         case kVisualisationQuads:
             VisualisationQuads();
             break;
@@ -39,47 +44,107 @@ void View::paintGL() {
             VisualisationTexture();
             break;
     }
+    qDebug() << "MIN: " << data_.GetMin();
+    qDebug() << "MAX: " << data_.GetMax();
 }
 
-void View::VisualisationQuads() {
+void View::VisualisationQuads()
+{
     float c;
     int w = data_.GetWidth();
     int h = data_.GetHeight();
+    int d = data_.GetDepth();
 
-    for (int y = 0; y < h - 1; y++) {
-
-
-        for (int x = 0; x < w - 1; x++)
+    switch (axis_cut_)
+    {
+        case x:
+        for (int y = 0; y < h - 1; y++)
         {
-            glBegin(GL_QUADS);
-            c = TransferFunction(data_[layer_ * w * h + y * w + x]);
-            glColor3f(c, c, c);
-            glVertex2i(x, y);
+            for (int x = 0; x < w - 1; x++)
+            {
+                glBegin(GL_QUADS);
+                c = TransferFunction(data_[layer_ * w * h + y * w + x]);
+                glColor3f(c, c, c);
+                glVertex2i(x, y);
 
-            c = TransferFunction(data_[layer_ * w * h + (y + 1) * w + x]);
-            glColor3f(c, c, c);
-            glVertex2i(x, y + 1);
+                c = TransferFunction(data_[layer_ * w * h + (y + 1) * w + x]);
+                glColor3f(c, c, c);
+                glVertex2i(x, y + 1);
 
-            c = TransferFunction(data_[layer_ * w * h + (y + 1) * w + x + 1]);
-            glColor3f(c, c, c);
-            glVertex2i(x + 1, y + 1);
+                c = TransferFunction(data_[layer_ * w * h + (y + 1) * w + x + 1]);
+                glColor3f(c, c, c);
+                glVertex2i(x + 1, y + 1);
 
-            c = TransferFunction(data_[layer_ * w * h + y * w + x + 1]);
-            glColor3f(c, c, c);
-            glVertex2i(x + 1, y);
-            glEnd();
+                c = TransferFunction(data_[layer_ * w * h + y * w + x + 1]);
+                glColor3f(c, c, c);
+                glVertex2i(x + 1, y);
+                glEnd();
+            }
         }
+        break;
 
+    case y:
+        for (int y = 0; y < h - 1; y++)
+        {
+            for (int x = 0; x < w - 1; x++)
+            {
+                glBegin(GL_QUADS);
+                c = TransferFunction(data_[layer_ + y * d + x * w * h]);
+                glColor3f(c, c, c);
+                glVertex2i(x, y);
 
+                c = TransferFunction(data_[layer_ + (y + 1) * d + x * w * h]);
+                glColor3f(c, c, c);
+                glVertex2i(x, y + 1);
+
+                c = TransferFunction(data_[layer_ + (y + 1) * d + (x + 1) * w * h]);
+                glColor3f(c, c, c);
+                glVertex2i(x + 1, y + 1);
+
+                c = TransferFunction(data_[layer_ + y * d + (x + 1) * w * h]);
+                glColor3f(c, c, c);
+                glVertex2i(x + 1, y);
+                glEnd();
+            }
+        }
+        break;
+
+    case z:
+        for (int y = 0; y < h - 1; y++)
+        {
+            for (int x = 0; x < w - 1; x++)
+            {
+                glBegin(GL_QUADS);
+                c = TransferFunction(data_[layer_ * w * h + y * w + x]);
+                glColor3f(c, c, c);
+                glVertex2i(x, y);
+
+                c = TransferFunction(data_[layer_ * w * h + (y + 1) * w + x]);
+                glColor3f(c, c, c);
+                glVertex2i(x, y + 1);
+
+                c = TransferFunction(data_[layer_ * w * h + (y + 1) * w + x + 1]);
+                glColor3f(c, c, c);
+                glVertex2i(x + 1, y + 1);
+
+                c = TransferFunction(data_[layer_ * w * h + y * w + x + 1]);
+                glColor3f(c, c, c);
+                glVertex2i(x + 1, y);
+                glEnd();
+            }
+        }
+        break;
+    }
 }
-}
 
-void View::VisualisationQuadStrip() {
+void View::VisualisationQuadStrip()
+{
     float c;
     int w = data_.GetWidth();
     int h = data_.GetHeight();
 
-    for (int y = 0; y < h - 1; y++) {
+    for (int y = 0; y < h - 1; y++)
+    {
             glBegin(GL_QUAD_STRIP);
             for (int x = 0; x < w; x++)
             {
@@ -114,29 +179,22 @@ void View::VisualisationTexture()
     glDisable(GL_TEXTURE_2D);
 }
 
-float View::TransferFunction(short value) {
+float View::TransferFunction(short value)
+{
     return float(value - data_.GetMin()) / float(data_.GetMax() - data_.GetMin());
 }
 
-void View::keyPressEvent(QKeyEvent *event) {
-    quint32 key_pressed = event->nativeVirtualKey();
-    if (key_pressed == Qt::Key_W) {
-        layer_ = std::min(layer_ + 1, data_.GetDepth() - 1);
-        //layer_ = ((layer_ + 2) < data_.GetDepth()) * (layer_ + 1);
-    } else if (key_pressed == Qt::Key_S) {
-        layer_ = std::max(layer_ - 1, 0);
-        //layer_ = (layer_ > 0) * (layer_ - 1);
-    } else if (key_pressed == Qt::Key_N) {
-        switch (visualisation_state_) {
-            case kVisualisationQuads:
-                visualisation_state_ = kVisualisationQuadStrip; break;
-            case kVisualisationQuadStrip:
-                visualisation_state_ = kVisualisationTexture; break;
-            case kVisualisationTexture:
-                visualisation_state_ = kVisualisationQuads; break;
-        }
-    }
+void View::SetMin(short value)
+{
+    qDebug() << "SET_MIN " << value;
+    data_.SetMin(value);
+    update();
+}
 
+void View::SetMax(short value)
+{
+    qDebug() << "SET_MAX " << value;
+    data_.SetMax(value);
     update();
 }
 
@@ -161,7 +219,37 @@ void View::genTextureImage()
     for (int x = 0; x < w; x++)
     {
         float c = TransferFunction(data_[layer_ * w * h + w * y + x]) * 255;
-        //QColor c(255,0,0);
+        if (c > 255)
+            c = 255;
+        else if (c < 0)
+            c = 0;
         textureImage.setPixelColor(x, y, QColor(c,c,c));
     }
 }
+
+void View::PressW()
+{
+    layer_ = std::min(layer_ + 1, data_.GetDepth() - 1);
+    update();
+}
+
+void View::PressS()
+{
+    layer_ = std::max(layer_ - 1, 0);
+    update();
+}
+
+void View::PressN()
+{
+    switch (visualisation_state_)
+    {
+        case kVisualisationQuads:
+            visualisation_state_ = kVisualisationQuadStrip; break;
+        case kVisualisationQuadStrip:
+            visualisation_state_ = kVisualisationTexture; break;
+        case kVisualisationTexture:
+            visualisation_state_ = kVisualisationQuads; break;
+    }
+    update();
+}
+

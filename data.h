@@ -4,8 +4,6 @@
 #include <string>
 #include <limits>
 
-#pragma comment (lib, "opengl32.lib")
-
 class Data {
 protected:
     int width_, height_, depth_;
@@ -21,6 +19,9 @@ public:
 
     short GetMin();
     short GetMax();
+
+    void SetMin(short value);
+    void SetMax(short value);
 
     int GetWidth();
     int GetHeight();
