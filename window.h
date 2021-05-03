@@ -104,6 +104,8 @@ private:
     QLabel *layerLabel;
     QLabel *layerCurrent;
 
+    QLabel *controls;
+
 private slots:
   void handleButton();
 

@@ -45,10 +45,12 @@ void Window::createControls(const QString &title)
     minimumSpinBox = new QSpinBox;
     minimumSpinBox->setRange(-50000, 50000);
     minimumSpinBox->setSingleStep(1);
+    minimumSpinBox->setValue(glWidget->GetMin());
 
     maximumSpinBox = new QSpinBox;
     maximumSpinBox->setRange(-50000, 50000);
     maximumSpinBox->setSingleStep(1);
+    maximumSpinBox->setValue(glWidget->GetMax());
 
     radio1 = new QRadioButton(tr("&X-Axis"));
     radio2 = new QRadioButton(tr("Y&-Axis"));
@@ -68,7 +70,9 @@ void Window::createControls(const QString &title)
     dimDepth = new QLabel(tr(std::to_string(glWidget->getDim()[2]).c_str()));
 
     layerLabel = new QLabel(tr("Current layer:"));
-    layerCurrent = new QLabel(tr(std::to_string(glWidget->getLayer()).c_str()));
+    layerCurrent = new QLabel(tr(std::to_string(glWidget->getLayer() + 1).c_str()));
+
+    controls = new QLabel(tr("Controls: W - go up a layer, S - go down a layer,\nN - change visualisation method."));
 
 
     connect(minimumSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),
@@ -110,6 +114,8 @@ void Window::createControls(const QString &title)
     controlsLayout->addWidget(layerLabel, 8, 0);
     controlsLayout->addWidget(layerCurrent, 8, 1);
 
+    controlsLayout->addWidget(controls, 9, 0);
+
     controlsGroup->setLayout(controlsLayout);
 }
 
@@ -119,16 +125,19 @@ void Window::handleButton()
   {
       qDebug() << "SET X";
       glWidget->SetX();
+      layerCurrent->setText(std::to_string(glWidget->getLayer() + 1).c_str());
   }
   else if (radio2->isChecked())
   {
       qDebug() << "SET Y";
       glWidget->SetY();
+      layerCurrent->setText(std::to_string(glWidget->getLayer() + 1).c_str());
   }
   else
   {
       qDebug() << "SET Z";
       glWidget->SetZ();
+      layerCurrent->setText(std::to_string(glWidget->getLayer() + 1).c_str());
   }
 }
 //! [8]
@@ -141,12 +150,12 @@ void Window::keyPressEvent(QKeyEvent *event)
     if (key_pressed == Qt::Key_W)
     {
         glWidget->PressW();
-        layerCurrent->setText(std::to_string(glWidget->getLayer()).c_str());
+        layerCurrent->setText(std::to_string(glWidget->getLayer() + 1).c_str());
     }
     else if (key_pressed == Qt::Key_S)
     {
         glWidget->PressS();
-        layerCurrent->setText(std::to_string(glWidget->getLayer()).c_str());
+        layerCurrent->setText(std::to_string(glWidget->getLayer() + 1).c_str());
     }
     else if (key_pressed == Qt::Key_N)
     {

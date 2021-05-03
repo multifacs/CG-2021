@@ -115,19 +115,19 @@ void View::VisualisationQuads()
             for (int x = 0; x < w - 1; x++)
             {
                 glBegin(GL_QUADS);
-                c = TransferFunction(data_[x + z * w * h + layer_ * h]);
+                c = TransferFunction(data_[x + z * w * h + layer_ * w]);
                 glColor3f(c, c, c);
                 glVertex2i(x, z);
 
-                c = TransferFunction(data_[x + (z + 1) * w * h + layer_ * h]);
+                c = TransferFunction(data_[x + (z + 1) * w * h + layer_ * w]);
                 glColor3f(c, c, c);
                 glVertex2i(x, z + 1);
 
-                c = TransferFunction(data_[(x + 1) + (z + 1) * w * h + layer_ * h]);
+                c = TransferFunction(data_[(x + 1) + (z + 1) * w * h + layer_ * w]);
                 glColor3f(c, c, c);
                 glVertex2i(x + 1, z + 1);
 
-                c = TransferFunction(data_[(x + 1) + z * w * h + layer_ * h]);
+                c = TransferFunction(data_[(x + 1) + z * w * h + layer_ * w]);
                 glColor3f(c, c, c);
                 glVertex2i(x + 1, z);
                 glEnd();
@@ -142,22 +142,64 @@ void View::VisualisationQuadStrip()
     float c;
     int w = data_.GetWidth();
     int h = data_.GetHeight();
+    int d = data_.GetDepth();
 
-    for (int y = 0; y < h - 1; y++)
+    switch(axis_cut_)
     {
-            glBegin(GL_QUAD_STRIP);
-            for (int x = 0; x < w; x++)
-            {
-                c = TransferFunction(data_[layer_ * w * h + y * w + x]);
-                glColor3f(c, c, c);
-                glVertex2i(x, y);
+    case x:
+        for (int y = 0; y < h - 1; y++)
+        {
+                glBegin(GL_QUAD_STRIP);
+                for (int x = 0; x < w; x++)
+                {
+                    c = TransferFunction(data_[layer_ * w * h + y * w + x]);
+                    glColor3f(c, c, c);
+                    glVertex2i(x, y);
 
-                c = TransferFunction(data_[layer_ * w * h + (y + 1) * w + x]);
-                glColor3f(c, c, c);
-                glVertex2i(x, y + 1);
-            }
-            glEnd();
-        }
+                    c = TransferFunction(data_[layer_ * w * h + (y + 1) * w + x]);
+                    glColor3f(c, c, c);
+                    glVertex2i(x, y + 1);
+                }
+                glEnd();
+         }
+        break;
+
+    case y:
+        for (int y = 0; y < h - 1; y++)
+        {
+                glBegin(GL_QUAD_STRIP);
+                for (int z = 0; z < d; z++)
+                {
+                    c = TransferFunction(data_[w * h * z + y * w + layer_]);
+                    glColor3f(c, c, c);
+                    glVertex2i(z, y);
+
+                    c = TransferFunction(data_[w * h * z + (y + 1) * w + layer_]);
+                    glColor3f(c, c, c);
+                    glVertex2i(z, y + 1);
+                }
+                glEnd();
+         }
+        break;
+
+    case z:
+        for (int z = 0; z < d - 1; z++)
+        {
+                glBegin(GL_QUAD_STRIP);
+                for (int x = 0; x < w; x++)
+                {
+                    c = TransferFunction(data_[x + z * w * h + layer_ * w]);
+                    glColor3f(c, c, c);
+                    glVertex2i(x, z);
+
+                    c = TransferFunction(data_[x + (z + 1) * w * h + layer_ * w]);
+                    glColor3f(c, c, c);
+                    glVertex2i(x, z + 1);
+                }
+                glEnd();
+         }
+        break;
+    }
 }
 
 void View::VisualisationTexture()
@@ -179,6 +221,67 @@ void View::VisualisationTexture()
     glDisable(GL_TEXTURE_2D);
 }
 
+void View::genTextureImage()
+{
+    float c;
+    int w = data_.GetWidth();
+    int h = data_.GetHeight();
+    int d = data_.GetDepth();
+    textureImage = QImage(w, h, QImage::Format_RGB32);
+    qDebug() << "GEN_TEXTURE";
+
+    switch(axis_cut_)
+    {
+    case x:
+        for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+            {
+                c = TransferFunction(data_[layer_ * w * h + w * y + x]) * 255;
+                if (c > 255)
+                    c = 255;
+                else if (c < 0)
+                    c = 0;
+                textureImage.setPixelColor(x, y, QColor(c,c,c));
+            }
+        break;
+
+    case y:
+        for (int y = 0; y < h; y++)
+            for (int z = 0; z < d; z++)
+            {
+                c = TransferFunction(data_[w * h * z + y * w + layer_]) * 255;
+                if (c > 255)
+                    c = 255;
+                else if (c < 0)
+                    c = 0;
+                textureImage.setPixelColor(z, y, QColor(c,c,c));
+            }
+        break;
+    case z:
+        for (int z = 0; z < d; z++)
+            for (int x = 0; x < w; x++)
+            {
+                c = TransferFunction(data_[x + z * w * h + layer_ * w]) * 255;
+                if (c > 255)
+                    c = 255;
+                else if (c < 0)
+                    c = 0;
+                textureImage.setPixelColor(x, z, QColor(c,c,c));
+            }
+        break;
+    }
+}
+
+void View::Load2dTexture()
+{
+    qDebug() << "LOAD_TEXTURE";
+    glBindTexture(GL_TEXTURE_2D, VBOtexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureImage.width(), textureImage.height(),
+    0, GL_BGRA, GL_UNSIGNED_BYTE, textureImage.bits());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
+
 float View::TransferFunction(short value)
 {
     return float(value - data_.GetMin()) / float(data_.GetMax() - data_.GetMin());
@@ -198,38 +301,21 @@ void View::SetMax(short value)
     update();
 }
 
-
-void View::Load2dTexture()
-{
-    qDebug() << "LOAD_TEXTURE";
-    glBindTexture(GL_TEXTURE_2D, VBOtexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureImage.width(), textureImage.height(),
-    0, GL_BGRA, GL_UNSIGNED_BYTE, textureImage.bits());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-}
-
-void View::genTextureImage()
-{
-    int w = data_.GetWidth();
-    int h = data_.GetHeight();
-    textureImage = QImage(w, h, QImage::Format_RGB32);
-    qDebug() << "GEN_TEXTURE";
-    for (int y = 0; y < h; y++)
-    for (int x = 0; x < w; x++)
-    {
-        float c = TransferFunction(data_[layer_ * w * h + w * y + x]) * 255;
-        if (c > 255)
-            c = 255;
-        else if (c < 0)
-            c = 0;
-        textureImage.setPixelColor(x, y, QColor(c,c,c));
-    }
-}
-
 void View::PressW()
 {
-    layer_ = std::min(layer_ + 1, data_.GetDepth() - 1);
+    switch(axis_cut_)
+    {
+    case x:
+        layer_ = std::min(layer_ + 1, data_.GetDepth() - 1);
+        break;
+    case y:
+        layer_ = std::min(layer_ + 1, data_.GetWidth() - 1);
+        break;
+    case z:
+        layer_ = std::min(layer_ + 1, data_.GetHeight() - 1);
+        break;
+    }
+
     update();
 }
 
@@ -251,5 +337,42 @@ void View::PressN()
             visualisation_state_ = kVisualisationQuads; break;
     }
     update();
+}
+
+void View::SetX()
+{
+    if (layer_ > data_.GetDepth() - 1)
+        layer_ = data_.GetDepth() - 1;
+
+    axis_cut_ = x;
+    update();
+}
+
+void View::SetY()
+{
+    if (layer_ > data_.GetWidth() - 1)
+        layer_ = data_.GetWidth() - 1;
+
+    axis_cut_ = y;
+    update();
+}
+
+void View::SetZ()
+{
+    if (layer_ > data_.GetHeight() - 1)
+        layer_ = data_.GetHeight() - 1;
+
+    axis_cut_ = z;
+    update();
+}
+
+short View::GetMin()
+{
+    return data_.GetMin();
+}
+
+short View::GetMax()
+{
+    return data_.GetMax();
 }
 

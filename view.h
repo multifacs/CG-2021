@@ -44,6 +44,9 @@ public:
         dims[2] = data_.GetDepth();
         return dims; }
 
+    short GetMin();
+    short GetMax();
+
 public slots:
     void SetMin(short value);
     void SetMax(short value);
@@ -52,14 +55,9 @@ public slots:
     void PressS();
     void PressN();
 
-    void SetX() { axis_cut_ = x; update(); }
-    void SetY() { axis_cut_ = y; update(); }
-    void SetZ() { axis_cut_ = z; update(); }
-
-signals:
-    void GetMin(short value);
-    void GetMax(short value);
-
+    void SetX();
+    void SetY();
+    void SetZ();
 
 protected slots:
 
