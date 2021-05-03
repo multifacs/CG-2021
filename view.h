@@ -36,6 +36,14 @@ public:
     View(QWidget *parent = nullptr);
     void LoadData(std::string filename);
 
+    int getLayer() { return layer_; }
+    int* getDim() {
+        int dims[3];
+        dims[0] = data_.GetWidth();
+        dims[1] = data_.GetHeight();
+        dims[2] = data_.GetDepth();
+        return dims; }
+
 public slots:
     void SetMin(short value);
     void SetMax(short value);

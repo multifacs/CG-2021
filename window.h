@@ -68,14 +68,19 @@ class Window : public QWidget
     Q_OBJECT
 
 public:
-    Window(QWidget *parent = nullptr);
+    Window(QWidget *parent = nullptr, const char* input = "");
 
 private:
     void createControls(const QString &title);
 
+    const char* document;
+
     View *glWidget;
 
     QGroupBox *controlsGroup;
+
+    QLabel *documentLabel;
+    QLabel *documentName;
 
     QLabel *minimumLabel;
     QLabel *maximumLabel;
@@ -88,6 +93,16 @@ private:
 
     QLabel *modeCurrent;
     QLabel *modeLabel;
+
+    QLabel *dimLabel1;
+    QLabel *dimLabel2;
+    QLabel *dimLabel3;
+    QLabel *dimWidth;
+    QLabel *dimHeight;
+    QLabel *dimDepth;
+
+    QLabel *layerLabel;
+    QLabel *layerCurrent;
 
 private slots:
   void handleButton();

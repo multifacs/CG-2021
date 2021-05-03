@@ -86,50 +86,50 @@ void View::VisualisationQuads()
     case y:
         for (int y = 0; y < h - 1; y++)
         {
-            for (int x = 0; x < w - 1; x++)
+            for (int z = 0; z < d - 1; z++)
             {
                 glBegin(GL_QUADS);
-                c = TransferFunction(data_[layer_ + y * d + x * w * h]);
+                c = TransferFunction(data_[w * h * z + y * w + layer_]);
                 glColor3f(c, c, c);
-                glVertex2i(x, y);
+                glVertex2i(z, y);
 
-                c = TransferFunction(data_[layer_ + (y + 1) * d + x * w * h]);
+                c = TransferFunction(data_[w * h * z + (y + 1) * w + layer_]);
                 glColor3f(c, c, c);
-                glVertex2i(x, y + 1);
+                glVertex2i(z, y + 1);
 
-                c = TransferFunction(data_[layer_ + (y + 1) * d + (x + 1) * w * h]);
+                c = TransferFunction(data_[w * h * (z + 1) + (y + 1) * w + layer_]);
                 glColor3f(c, c, c);
-                glVertex2i(x + 1, y + 1);
+                glVertex2i(z + 1, y + 1);
 
-                c = TransferFunction(data_[layer_ + y * d + (x + 1) * w * h]);
+                c = TransferFunction(data_[w * h * (z + 1) + y * w + layer_]);
                 glColor3f(c, c, c);
-                glVertex2i(x + 1, y);
+                glVertex2i(z + 1, y);
                 glEnd();
             }
         }
         break;
 
     case z:
-        for (int y = 0; y < h - 1; y++)
+        for (int z = 0; z < d - 1; z++)
         {
             for (int x = 0; x < w - 1; x++)
             {
                 glBegin(GL_QUADS);
-                c = TransferFunction(data_[layer_ * w * h + y * w + x]);
+                c = TransferFunction(data_[x + z * w * h + layer_ * h]);
                 glColor3f(c, c, c);
-                glVertex2i(x, y);
+                glVertex2i(x, z);
 
-                c = TransferFunction(data_[layer_ * w * h + (y + 1) * w + x]);
+                c = TransferFunction(data_[x + (z + 1) * w * h + layer_ * h]);
                 glColor3f(c, c, c);
-                glVertex2i(x, y + 1);
+                glVertex2i(x, z + 1);
 
-                c = TransferFunction(data_[layer_ * w * h + (y + 1) * w + x + 1]);
+                c = TransferFunction(data_[(x + 1) + (z + 1) * w * h + layer_ * h]);
                 glColor3f(c, c, c);
-                glVertex2i(x + 1, y + 1);
+                glVertex2i(x + 1, z + 1);
 
-                c = TransferFunction(data_[layer_ * w * h + y * w + x + 1]);
+                c = TransferFunction(data_[(x + 1) + z * w * h + layer_ * h]);
                 glColor3f(c, c, c);
-                glVertex2i(x + 1, y);
+                glVertex2i(x + 1, z);
                 glEnd();
             }
         }

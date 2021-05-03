@@ -6,13 +6,18 @@
 #include <QLabel>
 #include <QSpinBox>
 
-Window::Window(QWidget *parent)
+Window::Window(QWidget *parent, const char* input)
     : QWidget(parent)
 {
     setMinimumSize(1200,600);
 
     glWidget = new View;
-    glWidget->LoadData("torso1.bin");
+    QSurfaceFormat format;
+    QSurfaceFormat::setDefaultFormat(format);
+    glWidget->setFormat(format);
+    glWidget->LoadData(input);
+
+    document = input;
 
     createControls(tr("Controls"));
 
@@ -23,13 +28,13 @@ Window::Window(QWidget *parent)
 
     setWindowTitle(tr("Sliders"));
 }
-//! [2]
 
-//! [3]
 void Window::createControls(const QString &title)
-//! [3] //! [4]
 {
     controlsGroup = new QGroupBox(title);
+
+    documentLabel = new QLabel(tr("Document name:"));
+    documentName = new QLabel(tr(document));
 
     minimumLabel = new QLabel(tr("Minimum value:"));
     maximumLabel = new QLabel(tr("Maximum value:"));
@@ -55,6 +60,17 @@ void Window::createControls(const QString &title)
 
     radio1->setChecked(true);
 
+    dimLabel1 = new QLabel(tr("Width:"));
+    dimLabel2 = new QLabel(tr("Height:"));
+    dimLabel3 = new QLabel(tr("Depth:"));
+    dimWidth = new QLabel(tr(std::to_string(glWidget->getDim()[0]).c_str()));
+    dimHeight = new QLabel(tr(std::to_string(glWidget->getDim()[1]).c_str()));
+    dimDepth = new QLabel(tr(std::to_string(glWidget->getDim()[2]).c_str()));
+
+    layerLabel = new QLabel(tr("Current layer:"));
+    layerCurrent = new QLabel(tr(std::to_string(glWidget->getLayer()).c_str()));
+
+
     connect(minimumSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),
             glWidget, &View::SetMin);
     connect(minimumSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),
@@ -65,16 +81,34 @@ void Window::createControls(const QString &title)
             glWidget, &View::SetMax);
 
     QGridLayout *controlsLayout = new QGridLayout;
-    controlsLayout->addWidget(minimumLabel, 0, 0);
-    controlsLayout->addWidget(maximumLabel, 1, 0);
 
-    controlsLayout->addWidget(minimumSpinBox, 0, 1);
-    controlsLayout->addWidget(maximumSpinBox, 1, 1);
-    controlsLayout->addWidget(radio1, 2, 0);
-    controlsLayout->addWidget(radio2, 2, 1);
-    controlsLayout->addWidget(radio3, 2, 2);
-    controlsLayout->addWidget(modeLabel, 3, 0);
-    controlsLayout->addWidget(modeCurrent, 3, 1);
+    controlsLayout->addWidget(documentLabel, 0, 0);
+    controlsLayout->addWidget(documentName, 0, 1);
+
+    controlsLayout->addWidget(minimumLabel, 1, 0);
+    controlsLayout->addWidget(minimumSpinBox, 1, 1);
+
+    controlsLayout->addWidget(maximumLabel, 2, 0);
+    controlsLayout->addWidget(maximumSpinBox, 2, 1);
+
+    controlsLayout->addWidget(radio1, 3, 0);
+    controlsLayout->addWidget(radio2, 3, 1);
+    controlsLayout->addWidget(radio3, 3, 2);
+
+    controlsLayout->addWidget(modeLabel, 4, 0);
+    controlsLayout->addWidget(modeCurrent, 4, 1);
+
+    controlsLayout->addWidget(dimLabel1, 5, 0);
+    controlsLayout->addWidget(dimWidth, 5, 1);
+
+    controlsLayout->addWidget(dimLabel2, 6, 0);
+    controlsLayout->addWidget(dimHeight, 6, 1);
+
+    controlsLayout->addWidget(dimLabel3, 7, 0);
+    controlsLayout->addWidget(dimDepth, 7, 1);
+
+    controlsLayout->addWidget(layerLabel, 8, 0);
+    controlsLayout->addWidget(layerCurrent, 8, 1);
 
     controlsGroup->setLayout(controlsLayout);
 }
@@ -107,10 +141,12 @@ void Window::keyPressEvent(QKeyEvent *event)
     if (key_pressed == Qt::Key_W)
     {
         glWidget->PressW();
+        layerCurrent->setText(std::to_string(glWidget->getLayer()).c_str());
     }
     else if (key_pressed == Qt::Key_S)
     {
         glWidget->PressS();
+        layerCurrent->setText(std::to_string(glWidget->getLayer()).c_str());
     }
     else if (key_pressed == Qt::Key_N)
     {
