@@ -1,15 +1,11 @@
-#include <QCoreApplication>
-#include <string>
-
+#include "ShaderWidget.h"
+#include <QApplication>
+#include <QSurfaceFormat>
+#pragma comment (lib, "opengl32.lib")
 int main(int argc, char *argv[])
 {
-    std::string s;
-
-    for (int i = 0; i < argc; i++)
-    {
-        if (!strcmp(argv[i], "-p") && (i + 1 < argc))
-        {
-            s = argv[i + 1];
-        }
-    }
+    QApplication a(argc, argv);
+    ShaderWidget w(NULL);
+    w.show();
+    return a.exec();
 }
