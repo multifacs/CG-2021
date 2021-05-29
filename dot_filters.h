@@ -61,6 +61,36 @@ public:
     QImage process(const QImage& img) const override;
 };
 
+class PerfectReflectorFilter : public Filter
+{
+protected:
+    int mutable Rmax = 0;
+    int mutable Gmax = 0;
+    int mutable Bmax = 0;
+
+    QColor calcNewPixelColor(const QImage& img, int x, int y) const override;
+
+public:
+    QImage process(const QImage& img) const override;
+};
+
+class StaticCorrectionFilter : public Filter
+{
+protected:
+    float mutable Es[3] = {0, 0 ,0};
+    float mutable Ds[3] = {0, 0 ,0};
+    float mutable Et[3] = {0, 0 ,0};
+    float mutable Dt[3] = {0, 0 ,0};
+
+    QImage mutable source;
+
+    QColor calcNewPixelColor(const QImage& img, int x, int y) const override;
+
+public:
+    StaticCorrectionFilter(const QImage& img) : source(img) {}
+    QImage process(const QImage& img) const override;
+};
+
 class MedianFilter : public Filter
 {
 protected:
